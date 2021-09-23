@@ -1,6 +1,11 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"path/filepath"
+)
 
 func main() {
 	router := gin.Default()
@@ -43,6 +48,24 @@ func main() {
 			"username": username,
 			"password": password,
 		})
+	})
+
+	// 上传文件
+	// 给表单限制上传大小 (默认 32 MiB)
+	// router.MaxMultipartMemory = 8 << 20  // 8 MiB
+	router.POST("/upload", func(c *gin.Context) {
+		// 单文件
+		file, _ := c.FormFile("file")
+		fmt.Println(file.Filename)
+
+		// 上传文件到指定的路径
+		filename := filepath.Base(file.Filename)
+		if err := c.SaveUploadedFile(file, filename); err != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
+			return
+		}
+
+		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	})
 
 	router.Run() // listen and serve on 0.0.0.0:8080
