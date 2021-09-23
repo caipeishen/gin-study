@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"path/filepath"
 )
@@ -66,6 +67,25 @@ func main() {
 		}
 
 		c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+	})
+
+	// 多上传文件
+	router.POST("/uploadMulti", func(c *gin.Context) {
+		// 多文件
+		form, _ := c.MultipartForm()
+		files := form.File["files"]
+
+		for _, file := range files {
+			log.Println(file.Filename)
+
+			// 上传文件到指定的路径
+			filename := filepath.Base(file.Filename)
+			if err := c.SaveUploadedFile(file, filename); err != nil {
+				c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
+				return
+			}
+		}
+		c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
 	})
 
 	router.Run() // listen and serve on 0.0.0.0:8080
