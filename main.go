@@ -23,5 +23,13 @@ func main() {
 		})
 	})
 
+	// get请求
+	r.GET("/get", func(c *gin.Context) {
+		name := c.Query("name")
+		c.JSON(200, gin.H{
+			"message": name,
+		})
+	})
+
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
